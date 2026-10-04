@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
 import com.example.swiftycompanion.common.device.createApiHttpClient
 import com.example.swiftycompanion.common.device.createHttpClient
+import com.example.swiftycompanion.common.utils.Either
 import com.example.swiftycompanion.features.auth.device.ApiRemoteAuthSource
 import com.example.swiftycompanion.features.users.device.ApiRemoteUserSource
 import com.example.swiftycompanion.ui.theme.SwiftyCompanionTheme
@@ -35,8 +36,10 @@ class MainActivity : ComponentActivity() {
 
             try {
                 repeat(3) {
-                    val user = userSource.getUser("lform")
-                    Log.d("UserTest", "Got ${user.login}: ${user.displayName}, ${user.email}")
+                    when (val result = userSource.getUser("lformank")) {
+                        is Either.Success -> Log.d("UserTest", "Got ${result.value.login}: ${result.value.displayName}")
+                        is Either.Failure -> Log.w("UserTest", "Failed: ${result.error}")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("UserTest", "Failed", e)
