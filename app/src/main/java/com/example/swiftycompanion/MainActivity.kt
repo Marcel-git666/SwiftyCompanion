@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
+import com.example.swiftycompanion.common.device.createApiHttpClient
 import com.example.swiftycompanion.common.device.createHttpClient
 import com.example.swiftycompanion.features.auth.device.ApiRemoteAuthSource
+import com.example.swiftycompanion.features.users.device.ApiRemoteUserSource
 import com.example.swiftycompanion.ui.theme.SwiftyCompanionTheme
 import kotlinx.coroutines.launch
 
@@ -22,19 +24,25 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        // TEMP: ověření tokenu a prvního requestu – po testu smazat
         lifecycleScope.launch {
             val authSource = ApiRemoteAuthSource(
                 http = createHttpClient(),
                 clientId = BuildConfig.FORTY_TWO_UID,
                 clientSecret = BuildConfig.FORTY_TWO_SECRET,
             )
+            val userSource = ApiRemoteUserSource(http = createApiHttpClient(authSource))
+
             try {
-                val token = authSource.fetchToken()
-                Log.d("TokenTest", "OK, expiresIn=${token.expiresIn}s, token=${token.accessToken.take(6)}…")
+                repeat(3) {
+                    val user = userSource.getUser("lform")
+                    Log.d("UserTest", "Got ${user.login}: ${user.displayName}, ${user.email}")
+                }
             } catch (e: Exception) {
-                Log.e("TokenTest", "Failed", e)
+                Log.e("UserTest", "Failed", e)
             }
         }
+
         setContent {
             SwiftyCompanionTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->

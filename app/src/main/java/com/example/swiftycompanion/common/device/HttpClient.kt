@@ -39,7 +39,7 @@ fun createApiHttpClient(authSource: RemoteAuthSource): HttpClient =
                 refreshTokens {
                     Log.i(
                         "Auth",
-                        "Server returned 401 (token expired/invalid) → fetching a new one"
+                        "Server returned 401 (token expired/invalid) → fetching a new one",
                     )
                     BearerTokens(authSource.fetchToken().accessToken, null)
                 }

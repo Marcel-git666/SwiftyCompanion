@@ -9,6 +9,7 @@ import io.ktor.client.request.forms.submitForm
 import io.ktor.http.parameters
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
@@ -28,18 +29,20 @@ class ApiRemoteAuthSource(
             },
         ).body()
 
+        val receivedAt = Clock.System.now()
         val createdAt = Instant.fromEpochSeconds(token.createdAt)
         val validFor = token.expiresIn.seconds
-        val expiresAt = createdAt + validFor
+        val expiresAt = receivedAt + validFor
         Log.i(
             TAG,
-            "New token created at ${createdAt.localTime()}, valid for $validFor, expires at ${expiresAt.localTime()}",
+            "Token received at ${receivedAt.localTime()} (created by server at ${createdAt.localTime()}), " +
+                    "valid for $validFor, expires at ${expiresAt.localTime()}",
         )
         return token
     }
 
-    private fun Instant.localTime() = toLocalDateTime(TimeZone.currentSystemDefault()).time
-
+    private fun Instant.localTime() =
+        Instant.fromEpochSeconds(epochSeconds).toLocalDateTime(TimeZone.currentSystemDefault()).time
     private companion object {
         const val TAG = "Auth"
     }
