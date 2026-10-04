@@ -13,11 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.lifecycleScope
-import com.example.swiftycompanion.common.device.createApiHttpClient
-import com.example.swiftycompanion.common.device.createHttpClient
 import com.example.swiftycompanion.common.utils.Either
-import com.example.swiftycompanion.features.auth.device.ApiRemoteAuthSource
-import com.example.swiftycompanion.features.users.device.ApiRemoteUserSource
 import com.example.swiftycompanion.ui.theme.SwiftyCompanionTheme
 import kotlinx.coroutines.launch
 
@@ -27,12 +23,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         // TEMP: ověření tokenu a prvního requestu – po testu smazat
         lifecycleScope.launch {
-            val authSource = ApiRemoteAuthSource(
-                http = createHttpClient(),
-                clientId = BuildConfig.FORTY_TWO_UID,
-                clientSecret = BuildConfig.FORTY_TWO_SECRET,
-            )
-            val userSource = ApiRemoteUserSource(http = createApiHttpClient(authSource))
+            val userSource = (application as SwiftyCompanionApplication).container.userSource
 
             try {
                 repeat(3) {
