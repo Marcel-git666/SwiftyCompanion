@@ -1,11 +1,16 @@
 package com.example.swiftycompanion.features.auth.device
 
+import android.util.Log
 import com.example.swiftycompanion.features.auth.data.RemoteAuthSource
 import com.example.swiftycompanion.features.auth.device.models.TokenDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
 import io.ktor.http.parameters
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 class ApiRemoteAuthSource(
     private val http: HttpClient,
@@ -13,8 +18,8 @@ class ApiRemoteAuthSource(
     private val clientSecret: String,
 ) : RemoteAuthSource {
 
-    override suspend fun fetchToken(): TokenDto =
-        http.submitForm(
+    override suspend fun fetchToken(): TokenDto {
+        val token: TokenDto = http.submitForm(
             url = "https://api.intra.42.fr/oauth/token",
             formParameters = parameters {
                 append("grant_type", "client_credentials")
@@ -22,4 +27,20 @@ class ApiRemoteAuthSource(
                 append("client_secret", clientSecret)
             },
         ).body()
+
+        val createdAt = Instant.fromEpochSeconds(token.createdAt)
+        val validFor = token.expiresIn.seconds
+        val expiresAt = createdAt + validFor
+        Log.i(
+            TAG,
+            "New token created at ${createdAt.localTime()}, valid for $validFor, expires at ${expiresAt.localTime()}",
+        )
+        return token
+    }
+
+    private fun Instant.localTime() = toLocalDateTime(TimeZone.currentSystemDefault()).time
+
+    private companion object {
+        const val TAG = "Auth"
+    }
 }
