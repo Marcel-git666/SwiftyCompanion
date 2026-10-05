@@ -9,4 +9,6 @@
     <string name="error_unauthorized">Authorization failed. Check API credentials.</string>
     <string name="error_server_unavailable">42 API is unavailable. Try again later.</string>
     <string name="error_unknown">Something went wrong.</string>
+    <string name="profile_back">Back</string>
+    <string name="profile_retry">Retry</string>
 </resources>

@@ -36,6 +36,7 @@ import com.example.swiftycompanion.features.users.device.models.UserDto
 import com.example.swiftycompanion.features.users.errors.UserError
 import com.example.swiftycompanion.presentation.search.SearchState
 import com.example.swiftycompanion.presentation.search.SearchViewModel
+import com.example.swiftycompanion.ui.common.messageRes
 import com.example.swiftycompanion.ui.theme.SwiftyCompanionTheme
 
 @Composable
@@ -121,17 +122,6 @@ fun SearchContent(
         }
     }
 }
-
-@StringRes
-private fun UserError.messageRes(): Int =
-    when (this) {
-        UserError.NotFound -> R.string.error_not_found
-        UserError.NoConnection -> R.string.error_no_connection
-        UserError.RateLimited -> R.string.error_rate_limited
-        UserError.Unauthorized -> R.string.error_unauthorized
-        UserError.ServerUnavailable -> R.string.error_server_unavailable
-        is UserError.Unknown -> R.string.error_unknown
-    }
 
 @Preview(showBackground = true)
 @Composable
