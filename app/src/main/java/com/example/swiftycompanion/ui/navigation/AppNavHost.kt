@@ -23,6 +23,7 @@ fun AppNavHost(modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
         startDestination = SearchRoute,
+        modifier = modifier,
     ) {
         composable<SearchRoute> {
             SearchScreen(
