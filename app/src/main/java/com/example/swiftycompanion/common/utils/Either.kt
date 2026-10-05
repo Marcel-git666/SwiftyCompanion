@@ -7,4 +7,9 @@ sealed class Either<out V, out E> {
         if (this is Success) block(value)
         return this
     }
+    inline fun <NewV> map(transform: (V) -> NewV): Either<NewV, E> =
+        when (this) {
+            is Success -> Success(transform(value))
+            is Failure -> this
+        }
 }

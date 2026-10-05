@@ -1,6 +1,5 @@
 package com.example.swiftycompanion.ui.search
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.swiftycompanion.R
-import com.example.swiftycompanion.features.users.device.models.UserDto
+import com.example.swiftycompanion.features.users.domain.models.User
 import com.example.swiftycompanion.features.users.errors.UserError
 import com.example.swiftycompanion.presentation.search.SearchState
 import com.example.swiftycompanion.presentation.search.SearchViewModel
@@ -41,7 +40,7 @@ import com.example.swiftycompanion.ui.theme.SwiftyCompanionTheme
 
 @Composable
 fun SearchScreen(
-    onUserFound: (UserDto) -> Unit,
+    onUserFound: (User) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = viewModel(factory = SearchViewModel.Factory),
 ) {

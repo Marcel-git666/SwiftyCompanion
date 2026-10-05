@@ -1,6 +1,6 @@
 package com.example.swiftycompanion.presentation.search
 
-import com.example.swiftycompanion.features.users.device.models.UserDto
+import com.example.swiftycompanion.features.users.domain.models.User
 import com.example.swiftycompanion.features.users.errors.UserError
 
 data class SearchState(
@@ -11,6 +11,6 @@ data class SearchState(
         data object Idle : Status
         data object Loading : Status
         data class Error(val error: UserError) : Status
-        data class Found(val user: UserDto) : Status
+        data class Found(val user: User) : Status
     }
 }
