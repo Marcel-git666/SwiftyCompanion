@@ -30,7 +30,12 @@ class SearchViewModel(
 
     fun onIntent(intent: Intent) {
         when (intent) {
-            is Intent.QueryChanged -> _state.update { it.copy(query = intent.query) }
+            is Intent.QueryChanged -> _state.update {
+                it.copy(
+                    query = intent.query,
+                    status = if (it.status is SearchState.Status.Error) SearchState.Status.Idle else it.status,
+                )
+            }
             Intent.Search -> search()
             Intent.NavigationHandled -> _state.update { it.copy(status = SearchState.Status.Idle) }
         }
