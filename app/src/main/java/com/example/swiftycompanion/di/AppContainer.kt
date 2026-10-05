@@ -6,7 +6,9 @@ import com.example.swiftycompanion.common.device.createHttpClient
 import com.example.swiftycompanion.features.auth.data.RemoteAuthSource
 import com.example.swiftycompanion.features.auth.device.ApiRemoteAuthSource
 import com.example.swiftycompanion.features.users.data.RemoteUserSource
+import com.example.swiftycompanion.features.users.data.UserRepositoryImpl
 import com.example.swiftycompanion.features.users.device.ApiRemoteUserSource
+import com.example.swiftycompanion.features.users.domain.UserRepository
 import io.ktor.client.HttpClient
 
 class AppContainer {
@@ -18,5 +20,7 @@ class AppContainer {
 
     private val apiHttpClient: HttpClient = createApiHttpClient(authSource)
 
-    val userSource: RemoteUserSource = ApiRemoteUserSource(apiHttpClient)
+    private val userSource: RemoteUserSource = ApiRemoteUserSource(apiHttpClient)
+
+    val userRepository: UserRepository = UserRepositoryImpl(userSource)
 }

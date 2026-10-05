@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.swiftycompanion.SwiftyCompanionApplication
 import com.example.swiftycompanion.common.utils.Either
-import com.example.swiftycompanion.features.users.data.RemoteUserSource
+import com.example.swiftycompanion.features.users.domain.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SearchViewModel(
-    private val userSource: RemoteUserSource,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SearchState())
@@ -47,7 +47,7 @@ class SearchViewModel(
 
         _state.update { it.copy(status = SearchState.Status.Loading) }
         viewModelScope.launch {
-            val status = when (val result = userSource.getUser(login)) {
+            val status = when (val result = userRepository.getUser(login)) {
                 is Either.Success -> SearchState.Status.Found(result.value)
                 is Either.Failure -> SearchState.Status.Error(result.error)
             }
@@ -59,7 +59,7 @@ class SearchViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as SwiftyCompanionApplication
-                SearchViewModel(app.container.userSource)
+                SearchViewModel(app.container.userRepository)
             }
         }
     }
