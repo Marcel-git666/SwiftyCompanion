@@ -19,9 +19,9 @@ fun UserDto.toDomain(): User =
         location = location,
         wallet = wallet,
         correctionPoints = correctionPoints,
-        cursus = cursusUsers.maxByOrNull { Instant.parse(it.beginAt) }?.toDomain(),
+        cursus = cursusUsers.mainCursus()?.toDomain(),
         projects = projectsUsers
-            .filter { it.status == "finished" }
+            .filter { it.status == "finished" && it.validated != null }
             .map { it.toDomain() },
     )
 
@@ -40,3 +40,9 @@ private fun ProjectUserDto.toDomain(): Project =
         finalMark = finalMark ?: 0,
         isValidated = validated == true,
     )
+
+private fun List<CursusUserDto>.mainCursus(): CursusUserDto? =
+    firstOrNull { it.cursus.slug == MAIN_CURSUS_SLUG }
+        ?: maxByOrNull { Instant.parseOrNull(it.beginAt) ?: Instant.DISTANT_PAST }
+
+private const val MAIN_CURSUS_SLUG = "42cursus"

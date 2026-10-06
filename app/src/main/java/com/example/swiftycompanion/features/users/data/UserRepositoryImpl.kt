@@ -19,7 +19,7 @@ class UserRepositoryImpl(
         }
         return remoteSource.getUser(login)
             .map { it.toDomain() }
-            .onSuccess { cache[login] = it }
+            .onSuccess { cache[it.login] = it }
     }
 
     private companion object {
