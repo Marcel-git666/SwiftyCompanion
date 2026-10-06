@@ -28,4 +28,8 @@
     <string name="profile_project_failed">Failed</string>
     <string name="debug_simulate_token_expiry">Debug: simulate token expiry</string>
     <string name="error_invalid_login">Invalid login. Use only letters, digits and hyphens.</string>
+    <string name="profile_project_group">%1$s (%2$d)</string>
+    <string name="profile_project_group_other">Other</string>
+    <string name="profile_previous_cursus">Previous cursus</string>
+    <string name="profile_next_cursus">Next cursus</string>
 </resources>

@@ -9,7 +9,7 @@ data class User(
     val wallet: Int,
     val correctionPoints: Int,
     val cursus: Cursus?,
-    val projects: List<Project>,
+    val projectGroups: List<ProjectGroup>,
 )
 
 data class Cursus(
@@ -21,6 +21,11 @@ data class Cursus(
 data class Skill(
     val name: String,
     val level: Level,
+)
+
+data class ProjectGroup(
+    val cursusName: String?,
+    val projects: List<Project>,
 )
 
 data class Project(

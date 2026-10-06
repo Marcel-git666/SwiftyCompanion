@@ -1,6 +1,7 @@
 package com.example.swiftycompanion.ui.profile
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,19 +11,29 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.example.swiftycompanion.R
 import com.example.swiftycompanion.features.users.domain.models.Project
+import com.example.swiftycompanion.features.users.domain.models.ProjectGroup
 import com.example.swiftycompanion.features.users.domain.models.Skill
 import com.example.swiftycompanion.features.users.domain.models.User
+import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileList(
@@ -34,45 +45,134 @@ fun ProfileList(
         .widthIn(max = 720.dp)
         .fillMaxWidth()
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        item {
-            ProfileHeader(user = user, modifier = itemModifier)
-        }
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        val pagesPerViewport = if (maxWidth >= 600.dp) 2 else 1
 
-        item {
-            SectionTitle(
-                text = stringResource(R.string.profile_skills, skills.size),
-                modifier = itemModifier,
-            )
-        }
-        if (skills.isEmpty()) {
-            item { EmptyText(stringResource(R.string.profile_no_skills), itemModifier) }
-        } else {
-            items(skills) { skill ->
-                SkillRow(skill = skill, modifier = itemModifier)
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            item {
+                ProfileHeader(user = user, modifier = itemModifier)
             }
-        }
 
-        item {
-            SectionTitle(
-                text = stringResource(R.string.profile_projects, user.projects.size),
-                modifier = itemModifier,
-            )
-        }
-        if (user.projects.isEmpty()) {
-            item { EmptyText(stringResource(R.string.profile_no_projects), itemModifier) }
-        } else {
-            items(user.projects) { project ->
-                ProjectRow(project = project, modifier = itemModifier)
+            item {
+                SectionTitle(
+                    text = stringResource(R.string.profile_skills, skills.size),
+                    modifier = itemModifier,
+                )
+            }
+            if (skills.isEmpty()) {
+                item { EmptyText(stringResource(R.string.profile_no_skills), itemModifier) }
+            } else {
+                items(skills) { skill ->
+                    SkillRow(skill = skill, modifier = itemModifier)
+                }
+            }
+
+            if (user.projectGroups.isEmpty()) {
+                item {
+                    SectionTitle(
+                        text = stringResource(R.string.profile_projects, 0),
+                        modifier = itemModifier,
+                    )
+                }
+                item { EmptyText(stringResource(R.string.profile_no_projects), itemModifier) }
+            } else {
+                item {
+                    ProjectGroupsPager(
+                        groups = user.projectGroups,
+                        pagesPerViewport = pagesPerViewport,
+                        modifier = itemModifier,
+                    )
+                }
             }
         }
     }
 }
+
+@Composable
+private fun ProjectGroupsPager(
+    groups: List<ProjectGroup>,
+    pagesPerViewport: Int,
+    modifier: Modifier = Modifier,
+) {
+    val pagerState = rememberPagerState(pageCount = { groups.size })
+    val visiblePages = minOf(pagesPerViewport, groups.size)
+    val scope = rememberCoroutineScope()
+
+    Column(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionTitle(
+                text = stringResource(R.string.profile_projects, groups.sumOf { it.projects.size }),
+                modifier = Modifier.weight(1f),
+            )
+            if (groups.size > visiblePages) {
+                IconButton(
+                    onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage - 1) } },
+                    enabled = pagerState.canScrollBackward,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = stringResource(R.string.profile_previous_cursus),
+                    )
+                }
+                IconButton(
+                    onClick = { scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) } },
+                    enabled = pagerState.canScrollForward,
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_forward),
+                        contentDescription = stringResource(R.string.profile_next_cursus),
+                    )
+                }
+            }
+        }
+        HorizontalPager(
+            state = pagerState,
+            pageSize = PagesPerViewport(visiblePages),
+            pageSpacing = 24.dp,
+            verticalAlignment = Alignment.Top,
+        ) { page ->
+            ProjectGroupColumn(group = groups[page])
+        }
+    }
+}
+
+@Composable
+private fun ProjectGroupColumn(
+    group: ProjectGroup,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = projectGroupTitle(group),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        group.projects.forEach { project ->
+            ProjectRow(project = project)
+        }
+    }
+}
+
+private class PagesPerViewport(private val count: Int) : PageSize {
+    override fun Density.calculateMainAxisPageSize(availableSpace: Int, pageSpacing: Int): Int =
+        (availableSpace - (count - 1) * pageSpacing) / count
+}
+
+@Composable
+private fun projectGroupTitle(group: ProjectGroup): String =
+    stringResource(
+        R.string.profile_project_group,
+        group.cursusName ?: stringResource(R.string.profile_project_group_other),
+        group.projects.size,
+    )
 
 @Composable
 private fun SectionTitle(
