@@ -67,6 +67,11 @@ fun SearchContent(
 ) {
     val isLoading = state.status is SearchState.Status.Loading
     val canSearch = state.query.isNotBlank() && !isLoading
+    val errorMessage = when (val status = state.status) {
+        is SearchState.Status.Error -> stringResource(status.error.messageRes())
+        SearchState.Status.InvalidLogin -> stringResource(R.string.error_invalid_login)
+        else -> null
+    }
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -91,7 +96,7 @@ fun SearchContent(
                 label = { Text(stringResource(R.string.search_login_label)) },
                 singleLine = true,
                 enabled = !isLoading,
-                isError = state.status is SearchState.Status.Error,
+                isError = errorMessage != null,
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.None,
                     autoCorrectEnabled = false,
@@ -118,9 +123,9 @@ fun SearchContent(
                     Text(stringResource(R.string.debug_simulate_token_expiry))
                 }
             }
-            if (state.status is SearchState.Status.Error) {
+            if (errorMessage != null) {
                 Text(
-                    text = stringResource(state.status.error.messageRes()),
+                    text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                 )

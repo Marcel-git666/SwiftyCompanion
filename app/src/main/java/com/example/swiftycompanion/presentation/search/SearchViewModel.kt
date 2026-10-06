@@ -35,7 +35,11 @@ class SearchViewModel(
             is Intent.QueryChanged -> _state.update {
                 it.copy(
                     query = intent.query,
-                    status = if (it.status is SearchState.Status.Error) SearchState.Status.Idle else it.status,
+                    status = if (it.status is SearchState.Status.Error || it.status is SearchState.Status.InvalidLogin) {
+                        SearchState.Status.Idle
+                    } else {
+                        it.status
+                    },
                 )
             }
             Intent.Search -> search()
@@ -47,7 +51,10 @@ class SearchViewModel(
     private fun search() {
         val login = _state.value.query.trim().lowercase()
         if (login.isEmpty() || _state.value.status is SearchState.Status.Loading) return
-
+        if (!LOGIN_REGEX.matches(login)) {
+            _state.update { it.copy(status = SearchState.Status.InvalidLogin) }
+            return
+        }
         _state.update { it.copy(status = SearchState.Status.Loading) }
         viewModelScope.launch {
             val status = when (val result = userRepository.getUser(login)) {
@@ -59,6 +66,7 @@ class SearchViewModel(
     }
 
     companion object {
+        private val LOGIN_REGEX = Regex("^[a-z0-9-]+$")
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as SwiftyCompanionApplication

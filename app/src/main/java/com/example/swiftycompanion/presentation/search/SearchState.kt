@@ -10,6 +10,7 @@ data class SearchState(
     sealed interface Status {
         data object Idle : Status
         data object Loading : Status
+        data object InvalidLogin : Status
         data class Error(val error: UserError) : Status
         data class Found(val user: User) : Status
     }

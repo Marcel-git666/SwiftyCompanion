@@ -3,6 +3,7 @@ package com.example.swiftycompanion.ui.navigation
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.dropUnlessResumed
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -27,12 +28,16 @@ fun AppNavHost(modifier: Modifier = Modifier) {
     ) {
         composable<SearchRoute> {
             SearchScreen(
-                onUserFound = { user -> navController.navigate(ProfileRoute(login = user.login)) },
+                onUserFound = { user ->
+                    navController.navigate(ProfileRoute(login = user.login)) {
+                        launchSingleTop = true
+                    }
+                },
                 modifier = Modifier.safeDrawingPadding(),
             )
         }
         composable<ProfileRoute> {
-            ProfileScreen(onBack = { navController.popBackStack() })
+            ProfileScreen(onBack = dropUnlessResumed { navController.popBackStack() })
         }
     }
 }
