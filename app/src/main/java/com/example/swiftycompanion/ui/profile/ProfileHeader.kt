@@ -14,12 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.swiftycompanion.R
 import com.example.swiftycompanion.features.users.domain.models.User
+import com.example.swiftycompanion.ui.theme.online
 
 @Composable
 fun ProfileHeader(
@@ -77,6 +79,7 @@ private fun ProfileDetails(
         DetailRow(
             label = stringResource(R.string.profile_location),
             value = user.location ?: stringResource(R.string.profile_location_unavailable),
+            valueColor = if (user.location != null) MaterialTheme.colorScheme.online else Color.Unspecified,
         )
         DetailRow(label = stringResource(R.string.profile_wallet), value = "${user.wallet} ₳")
         DetailRow(label = stringResource(R.string.profile_correction_points), value = user.correctionPoints.toString())
@@ -93,6 +96,7 @@ private fun ProfileDetails(
 private fun DetailRow(
     label: String,
     value: String,
+    valueColor: Color = Color.Unspecified,
 ) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -101,6 +105,10 @@ private fun DetailRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(1f),
         )
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = valueColor,
+            )
     }
 }
