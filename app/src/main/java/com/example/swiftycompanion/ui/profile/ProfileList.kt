@@ -1,0 +1,161 @@
+package com.example.swiftycompanion.ui.profile
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.example.swiftycompanion.R
+import com.example.swiftycompanion.features.users.domain.models.Project
+import com.example.swiftycompanion.features.users.domain.models.Skill
+import com.example.swiftycompanion.features.users.domain.models.User
+
+@Composable
+fun ProfileList(
+    user: User,
+    modifier: Modifier = Modifier,
+) {
+    val skills = user.cursus?.skills.orEmpty()
+    val itemModifier = Modifier
+        .widthIn(max = 720.dp)
+        .fillMaxWidth()
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        item {
+            ProfileHeader(user = user, modifier = itemModifier)
+        }
+
+        item {
+            SectionTitle(
+                text = stringResource(R.string.profile_skills, skills.size),
+                modifier = itemModifier,
+            )
+        }
+        if (skills.isEmpty()) {
+            item { EmptyText(stringResource(R.string.profile_no_skills), itemModifier) }
+        } else {
+            items(skills) { skill ->
+                SkillRow(skill = skill, modifier = itemModifier)
+            }
+        }
+
+        item {
+            SectionTitle(
+                text = stringResource(R.string.profile_projects, user.projects.size),
+                modifier = itemModifier,
+            )
+        }
+        if (user.projects.isEmpty()) {
+            item { EmptyText(stringResource(R.string.profile_no_projects), itemModifier) }
+        } else {
+            items(user.projects) { project ->
+                ProjectRow(project = project, modifier = itemModifier)
+            }
+        }
+    }
+}
+
+@Composable
+private fun SectionTitle(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        modifier = modifier.padding(top = 16.dp),
+    )
+}
+
+@Composable
+private fun EmptyText(
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun SkillRow(
+    skill: Skill,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = skill.name,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = stringResource(R.string.profile_level_value, skill.level.whole, skill.level.percent),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        LinearProgressIndicator(
+            progress = { skill.level.percent / 100f },
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun ProjectRow(
+    project: Project,
+    modifier: Modifier = Modifier,
+) {
+    val color = if (project.isValidated) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    val result = stringResource(
+        if (project.isValidated) R.string.profile_project_passed else R.string.profile_project_failed,
+    )
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = project.name,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f),
+        )
+        Text(
+            text = result,
+            style = MaterialTheme.typography.labelMedium,
+            color = color,
+        )
+        Text(
+            text = project.finalMark.toString(),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
+    }
+}

@@ -90,13 +90,7 @@ private fun ProfileContent(
                 }
             }
 
-            is ProfileState.Loaded -> ProfileHeader(
-                user = state.user,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-            )
+            is ProfileState.Loaded -> ProfileList(user = state.user)
         }
     }
 }
