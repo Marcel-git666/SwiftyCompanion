@@ -1,6 +1,7 @@
 package com.example.swiftycompanion.common.device
 
 import android.util.Log
+import com.example.swiftycompanion.BuildConfig
 import com.example.swiftycompanion.features.auth.data.RemoteAuthSource
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -9,6 +10,9 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
@@ -24,17 +28,36 @@ fun createHttpClient(): HttpClient =
                 },
             )
         }
+
+        if (BuildConfig.DEBUG) {
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Log.d("HTTP", message)
+                    }
+                }
+                level = LogLevel.INFO
+            }
+        }
     }
 
-fun createApiHttpClient(authSource: RemoteAuthSource): HttpClient =
+fun createApiHttpClient(
+    authSource: RemoteAuthSource,
+    expiredTokenSimulation: ExpiredTokenSimulation,
+    ): HttpClient =
     createHttpClient().config {
         defaultRequest { url("https://api.intra.42.fr/v2/") }
 
         install(Auth) {
             bearer {
                 loadTokens {
-                    Log.i("Auth", "No token in memory → fetching a new one")
-                    BearerTokens(authSource.fetchToken().accessToken, null)
+                    if (expiredTokenSimulation.consume()) {
+                        Log.i("Auth", "DEBUG: using a simulated expired token")
+                        BearerTokens("simulated-expired-token", null)
+                    } else {
+                        Log.i("Auth", "No token in memory → fetching a new one")
+                        BearerTokens(authSource.fetchToken().accessToken, null)
+                    }
                 }
                 refreshTokens {
                     Log.i(

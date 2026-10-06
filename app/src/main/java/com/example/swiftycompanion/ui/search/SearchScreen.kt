@@ -17,6 +17,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.swiftycompanion.BuildConfig
 import com.example.swiftycompanion.R
 import com.example.swiftycompanion.features.users.domain.models.User
 import com.example.swiftycompanion.features.users.errors.UserError
@@ -109,6 +111,11 @@ fun SearchContent(
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                 } else {
                     Text(stringResource(R.string.search_button))
+                }
+            }
+            if (BuildConfig.DEBUG) {
+                TextButton(onClick = { onIntent(SearchViewModel.Intent.SimulateTokenExpiry) }) {
+                    Text(stringResource(R.string.debug_simulate_token_expiry))
                 }
             }
             if (state.status is SearchState.Status.Error) {

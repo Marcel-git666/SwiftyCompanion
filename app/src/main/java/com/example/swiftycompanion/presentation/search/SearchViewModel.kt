@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val userRepository: UserRepository,
+    private val simulateTokenExpiry: () -> Unit,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SearchState())
@@ -26,6 +27,7 @@ class SearchViewModel(
         data class QueryChanged(val query: String) : Intent
         data object Search : Intent
         data object NavigationHandled : Intent
+        data object SimulateTokenExpiry : Intent
     }
 
     fun onIntent(intent: Intent) {
@@ -38,6 +40,7 @@ class SearchViewModel(
             }
             Intent.Search -> search()
             Intent.NavigationHandled -> _state.update { it.copy(status = SearchState.Status.Idle) }
+            Intent.SimulateTokenExpiry -> simulateTokenExpiry()
         }
     }
 
@@ -59,7 +62,10 @@ class SearchViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val app = this[APPLICATION_KEY] as SwiftyCompanionApplication
-                SearchViewModel(app.container.userRepository)
+                SearchViewModel(
+                    userRepository = app.container.userRepository,
+                    simulateTokenExpiry = app.container::simulateTokenExpiry,
+                )
             }
         }
     }
